@@ -1,26 +1,21 @@
 local G2L = {};
-
--- CONFIGURAÇÃO DO PIESOCKET (SpwnCub V2 Chat)
+
 local wsUrl = "wss://free.blr2.piesocket.com/v3/1?api_key=iwYCQEyErMVj5txmeTDuzQ0Sle6V7tcAuOvlZQZp&notify_self=1"
-
--- IDs dos Ícones da UI
+
 local ID_NORMAL = "rbxassetid://134601196355279"
 local ID_NOTIFICACAO = "rbxassetid://130103945046316"
 local ID_SIMBOLO_CENTRAL = "rbxassetid://85337967115080"
 local ID_BOTAO_FECHAR = "rbxassetid://98235327129327"
 local ID_BOTAO_SELECAO = "rbxassetid://105157650009654"
 local ID_SOM_NOTIFICACAO = "rbxassetid://1293433423"
-
--- IDs de Ícones
+
 local ID_MUTE_NOTIF = "rbxassetid://97625127106275"
 local ID_MUTE_PLAYER = "rbxassetid://112424947376515"
 local ID_MODO_FOCO = "rbxassetid://123611220469778"
-
--- DEFINIÇÃO DE FONTES
+
 local FONTE_PIXEL = Enum.Font.Arcade
 local FONTE_MENSAGENS = Enum.Font.SourceSansBold
-
--- Prevenção de execução dupla
+
 if getgenv().custom_chat_loaded then
     warn("Limpando execução anterior...")
     if game:GetService("CoreGui"):FindFirstChild("GlobalChat_Elite_V3") then
@@ -37,8 +32,7 @@ local ChatService = game:GetService("Chat")
 local Player = Players.LocalPlayer
 
 local CURRENT_SERVER_ID = (game.JobId ~= "" and game.JobId) or "STUDIO_SERVER"
-
--- Estados de Controle
+
 local modoSelecaoAtivo = false
 local modoFocoAtivo = false
 local notificacaoSomAtiva = true
@@ -50,26 +44,22 @@ local abasPrivadas = {}
 local botoesAbasFixas = {}
 local jogadoresMutados = {} -- { [username] = true }
 local historicoMensagensInstancias = {} -- Guarda referências das UIs de mensagem enviadas por cada player
-
--- TAMANHOS PADRÃO DA INTERFACE (Ligeiramente aumentado no modo foco)
+
 local SIZE_NORMAL = UDim2.new(0, 420, 0, 270)
 local SIZE_FOCO = UDim2.new(0, 480, 0, 320)
-
--- UI PRINCIPAL
+
 G2L.ScreenGui = Instance.new("ScreenGui")
 G2L.ScreenGui.Name = "GlobalChat_Elite_V3"
 G2L.ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 G2L.ScreenGui.ResetOnSpawn = false
 G2L.ScreenGui.Parent = game:GetService("CoreGui")
-
--- INSTÂNCIA DO SOM
+
 local NotificationSound = Instance.new("Sound")
 NotificationSound.Name = "ChatNotificationSound"
 NotificationSound.SoundId = ID_SOM_NOTIFICACAO
 NotificationSound.Volume = 1
 NotificationSound.Parent = G2L.ScreenGui
-
--- BOTÃO TOGGLE
+
 G2L.ToggleButton = Instance.new("ImageButton")
 G2L.ToggleButton.Name = "ToggleChat"
 G2L.ToggleButton.Size = UDim2.new(0, 55, 0, 55)
@@ -77,8 +67,7 @@ G2L.ToggleButton.Position = UDim2.new(0.02, 0, 0.45, 0)
 G2L.ToggleButton.BackgroundTransparency = 1 
 G2L.ToggleButton.Image = ID_NORMAL
 G2L.ToggleButton.Parent = G2L.ScreenGui
-
--- JANELA PRINCIPAL
+
 G2L.Main = Instance.new("Frame")
 G2L.Main.Name = "MainFrame"
 G2L.Main.Size = SIZE_NORMAL
@@ -97,8 +86,7 @@ G2L.MainStroke = Instance.new("UIStroke")
 G2L.MainStroke.Color = Color3.fromRGB(255, 255, 255)
 G2L.MainStroke.Thickness = 1.2
 G2L.MainStroke.Parent = G2L.Main
-
--- TOPBAR
+
 G2L.TopBar = Instance.new("Frame")
 G2L.TopBar.Size = UDim2.new(1, 0, 0, 35)
 G2L.TopBar.BackgroundTransparency = 1
@@ -116,8 +104,7 @@ G2L.Title.TextSize = 15
 G2L.Title.TextXAlignment = Enum.TextXAlignment.Left
 G2L.Title.ZIndex = 5
 G2L.Title.Parent = G2L.TopBar
-
--- BOTÕES TOPBAR
+
 G2L.CloseBtn = Instance.new("ImageButton")
 G2L.CloseBtn.Name = "CloseBtn"
 G2L.CloseBtn.Size = UDim2.new(0, 22, 0, 22)
@@ -166,8 +153,7 @@ G2L.MuteNotifBtn.Image = ID_MUTE_NOTIF
 G2L.MuteNotifBtn.ImageColor3 = Color3.fromRGB(255, 255, 255)
 G2L.MuteNotifBtn.ZIndex = 6
 G2L.MuteNotifBtn.Parent = G2L.TopBar
-
--- BARRA DE ABAS
+
 G2L.TabBar = Instance.new("ScrollingFrame")
 G2L.TabBar.Name = "TabBar"
 G2L.TabBar.Size = UDim2.new(1, -20, 0, 24)
@@ -208,8 +194,7 @@ G2L.CenterSymbol.ImageColor3 = Color3.fromRGB(255, 255, 255)
 G2L.CenterSymbol.ImageTransparency = 0.88
 G2L.CenterSymbol.ZIndex = 1
 G2L.CenterSymbol.Parent = G2L.Main
-
--- HISTÓRICOS
+
 G2L.ServerHistory = Instance.new("ScrollingFrame")
 G2L.ServerHistory.Name = "ServerHistory"
 G2L.ServerHistory.Size = UDim2.new(1, -24, 1, -120)
@@ -243,10 +228,7 @@ local GlobalLayout = Instance.new("UIListLayout")
 GlobalLayout.Padding = UDim.new(0, 1) -- Espaçamento reduzido
 GlobalLayout.SortOrder = Enum.SortOrder.LayoutOrder
 GlobalLayout.Parent = G2L.GlobalHistory
-
----------------------------------------------------------------------
--- MINI INTERFACE: CHAT PV OU SILENCIAR?
----------------------------------------------------------------------
+
 local ActionMenu = Instance.new("Frame")
 ActionMenu.Name = "ActionMenu"
 ActionMenu.Size = UDim2.new(0, 200, 0, 85)
@@ -307,10 +289,7 @@ ActionMuteBtn.Parent = ActionMenu
 local ActionMuteCorner = Instance.new("UICorner")
 ActionMuteCorner.CornerRadius = UDim.new(0, 4)
 ActionMuteCorner.Parent = ActionMuteBtn
-
----------------------------------------------------------------------
--- MINI INTERFACE: LISTA DE PLAYERS MUTADOS
----------------------------------------------------------------------
+
 local MutedListMenu = Instance.new("Frame")
 MutedListMenu.Name = "MutedListMenu"
 MutedListMenu.Size = UDim2.new(0, 200, 0, 160)
@@ -366,10 +345,7 @@ MutedScrollLayout.Parent = MutedScroll
 MutedScrollLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
     MutedScroll.CanvasSize = UDim2.new(0, 0, 0, MutedScrollLayout.AbsoluteContentSize.Y + 5)
 end)
-
----------------------------------------------------------------------
--- POP-UP TOAST
----------------------------------------------------------------------
+
 local ToastFrame = Instance.new("Frame")
 ToastFrame.Name = "PV_Toast"
 ToastFrame.Size = UDim2.new(0.9, 0, 0, 42)
@@ -430,8 +406,7 @@ local function OcultarToast()
 end
 
 ToastCloseBtn.MouseButton1Click:Connect(OcultarToast)
-
--- FUNÇÕES DE CONTROLE DE MENSAGENS E FOCO
+
 local TargetIndicator
 
 local function AjustarAlturaHistoricos(indicadorVisivel)
@@ -494,12 +469,12 @@ local function SelecionarAba(nomeAba)
     if nomeAba == "SERVER" then
         modoGlobal = false
         destinatarioPrivado = nil
-        G2L.Title.Text = "CHAT SERVIDOR SPWNCUB"
+        G2L.Title.Text = "CHAT SERVIDOR SPAWN"
         G2L.ServerHistory.Visible = true
     elseif nomeAba == "GLOBAL" then
         modoGlobal = true
                 destinatarioPrivado = nil
-        G2L.Title.Text = "CHAT GLOBAL SPWNCUB"
+        G2L.Title.Text = "CHAT GLOBAL SPAWN"
         G2L.GlobalHistory.Visible = true
     else
         destinatarioPrivado = nomeAba
@@ -794,8 +769,7 @@ G2L.MuteNotifBtn.MouseButton1Click:Connect(function()
         G2L.MuteNotifBtn.ImageColor3 = Color3.fromRGB(255, 255, 255)
     end
 end)
-
--- FECHA OS POP-UPS AO CLICAR FORA
+
 UserInputService.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         local mousePos = input.Position
@@ -824,10 +798,7 @@ UserInputService.InputBegan:Connect(function(input)
         end
     end
 end)
-
----------------------------------------------------------------------
--- INDICADOR INFERIOR DE TARGET
----------------------------------------------------------------------
+
 TargetIndicator = Instance.new("Frame")
 TargetIndicator.Size = UDim2.new(1, -16, 0, 20)
 TargetIndicator.Position = UDim2.new(0, 8, 1, -68)
@@ -872,8 +843,7 @@ CancelTargetBtn.MouseButton1Click:Connect(function()
     AjustarAlturaHistoricos(false)
     SelecionarAba(modoGlobal and "GLOBAL" or "SERVER")
 end)
-
--- INPUT BOTTOM
+
 G2L.BottomArea = Instance.new("Frame")
 G2L.BottomArea.Size = UDim2.new(1, -16, 0, 38)
 G2L.BottomArea.Position = UDim2.new(0, 8, 1, -46)
@@ -917,8 +887,7 @@ local function MostrarBubbleChat(username, message)
         ChatService:Chat(targetPlayer.Character.Head, message, Enum.ChatColor.White)
     end
 end
-
--- ADICIONAR MENSAGEM
+
 local function AdicionarMensagem(username, displayname, msg, isMe, isPrivate, mode, targetUser)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(1, -5, 0, 18)
